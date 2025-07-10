@@ -1,0 +1,64 @@
+# Системные файлы
+*.DS_Store
+Thumbs.db
+
+# Модели
+finetuned_tts_model/
+original_tts_model/
+
+# Виртуальные окружения
+venv/
+env/
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# Логи и результаты тестов
+logs/
+*.log
+*.pot
+*.pyc
+*.pyo
+__pycache__
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# CI/CD
+.git
+.gitignore
+*.md
+.dockerignore
+
+# IDE / редакторы
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.sublime-project
+*.sublime-workspace
+
+# Конфигурационные файлы и данные
+.env.local
+.env.development
+.env.test
+.env.example
+.env.template
+.env.*.local
+
+# Кэши
+.cache
+*.cache
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Артефакты сборки
+dist/
+build/
+*.egg-info/

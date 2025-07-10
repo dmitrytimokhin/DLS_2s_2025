@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  app:
+    image: video-dubbing-dls  # Имя образа Docker, который ты уже собрал
+    build: .                  # Путь к директории с Dockerfile (если нужно пересобрать)
+    container_name: video-dubbing  # Имя контейнера
+    runtime: nvidia           # Для использования GPU
+    volumes:
+      - .:/workspace          # Монтируем текущую директорию проекта в /workspace внутри контейнера
+    ports:
+      - "8888:8888"          # Пробрасываем порт JupyterLab (или другой нужный порт)
+    environment:
+      NVIDIA_VISIBLE_DEVICES: all  # Разрешаем доступ ко всем GPU
+    stdin_open: true          # Открываем STDIN
+    tty: true                 # Включаем TTY для интерактивного режима
+    command: bash
+#    command: jupyter lab --ip=0.0.0.0 --port=8888 --no-browser --allow-root

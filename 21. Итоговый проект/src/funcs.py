@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import NoReturn, Optional
+from typing import NoReturn, Optional, Tuple
 import shutil
 import random
 import numpy as np
@@ -224,7 +224,7 @@ def add_audio_to_video(
 def download_and_unzip(file_id: str,
                        output_zip: str='finetuned_tts_model.zip',
                        extract_to: str='./',
-                       folder_name: str='finetuned_tts_model') -> NoReturn:
+                       folder_name: str='finetuned_tts_model') -> Tuple[bool, str]:
     """
     Скачивает и распаковывает файлы дообученной модели на голосе В.В. Путина
     
@@ -235,20 +235,24 @@ def download_and_unzip(file_id: str,
         folder_name (str): наименование директории для проверки на наличие перед скачиванием
     """
     
-    target_folder = create_path(extract_to, folder_name)
+    try:
+        target_folder = create_path(extract_to, folder_name)
 
-    # Проверяем, существует ли уже нужная папка
-    if os.path.exists(target_folder):
-        logger.info(f"Папка {target_folder} уже существует. Пропускаем скачивание.")
-        return
+        # Проверяем, существует ли уже нужная папка
+        if os.path.exists(target_folder):
+            logger.info(f"Папка {target_folder} уже существует. Пропускаем скачивание.")
+            return
 
-    url = f" https://drive.google.com/uc?id={file_id}"
-    logger.info(f"Скачивание 'finetuned_tts_model' по {url}...")
-    gdown.download(url, output_zip, quiet=False)
-    
-    logger.info(f"Распаковка 'finetuned_tts_model' {output_zip} в {extract_to}...")
-    with zipfile.ZipFile(output_zip, 'r') as zip_ref:
-        zip_ref.extractall(extract_to)
-    
-    logger.debug(f"Очистка: удаление {output_zip}")
-    os.remove(output_zip)
+        url = f" https://drive.google.com/uc?id={file_id}"
+        logger.info(f"Скачивание 'finetuned_tts_model' по {url}...")
+        gdown.download(url, output_zip, quiet=False)
+        
+        logger.info(f"Распаковка 'finetuned_tts_model' {output_zip} в {extract_to}...")
+        with zipfile.ZipFile(output_zip, 'r') as zip_ref:
+            zip_ref.extractall(extract_to)
+        
+        logger.debug(f"Очистка: удаление {output_zip}")
+        os.remove(output_zip)
+    except Exception as e:
+        logger.error(f'Ошибка при загрузке файлов дообученной модели {e}')
+        return False, target_folder

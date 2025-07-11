@@ -19,7 +19,7 @@ from src import download_missing_model_files
 
 from handlers import FSMVoice
 from keyboards import (kb_main, kb_voice_video, kb_voice_audio, kb_transcription_type, 
-                       kb_translation_type, kb_reply_go_home, kb_go_home, kb_again)
+                       kb_translation_type, kb_reply_go_home, kb_again)
 from src import manage_directory
 from src import full_pipeline, run_transcription, run_translation, gen_audio
 
@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 FINETUNED_TTS_MODEL = os.getenv('FINETUNED_TTS_MODEL')
+DOWNLOADED_PUTIN, FINETUNED_MODEL_TTS_DIR = download_and_unzip(file_id=FINETUNED_TTS_MODEL)
 
 SEED = 42
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
@@ -42,11 +43,10 @@ MODEL_MT_NAME = "facebook/nllb-200-distilled-600M"
 ORIGINAL_MODEL_TTS_DIR = "./original_tts_model/"
 manage_directory(ORIGINAL_MODEL_TTS_DIR)
 
-FINETUNED_MODEL_TTS_DIR = "./finetuned_tts_model/"
-FINETUNED_CONFIG = create_path(FINETUNED_MODEL_TTS_DIR, "config.json")
-FINETUNED_CHECKPOINT = create_path(FINETUNED_MODEL_TTS_DIR, "best_model.pth")
-FINETUNED_REF = create_path(FINETUNED_MODEL_TTS_DIR, "putin_ref.wav")
-manage_directory(FINETUNED_MODEL_TTS_DIR)
+if DOWNLOADED_PUTIN:
+    FINETUNED_CONFIG = create_path(FINETUNED_MODEL_TTS_DIR, "config.json")
+    FINETUNED_CHECKPOINT = create_path(FINETUNED_MODEL_TTS_DIR, "best_model.pth")
+    FINETUNED_REF = create_path(FINETUNED_MODEL_TTS_DIR, "putin_ref.wav")
 
 MAX_DURATION_MS = 20 * 1000
 
@@ -88,21 +88,20 @@ if LOAD_MODELS:
         ORIG_MODEL_TTS.to(DEVICE)
         logger.info("Оригинальная модель XTTS_v2 успешно инициализированна!")
 
-        logger.info("Инициализируем конфиг и дообученную модель XTTS")
-        fine_config = XttsConfig()
-        fine_config.load_json(FINETUNED_CONFIG)
-        
-        download_and_unzip(file_id=FINETUNED_TTS_MODEL)
+        if DOWNLOADED_PUTIN:
+            logger.info("Инициализируем конфиг и дообученную модель XTTS")
+            fine_config = XttsConfig()
+            fine_config.load_json(FINETUNED_CONFIG)
 
-        FINE_MODEL_TTS = Xtts.init_from_config(fine_config)
-        FINE_MODEL_TTS.load_checkpoint(
-            fine_config,
-            checkpoint_dir=FINETUNED_MODEL_TTS_DIR,
-            checkpoint_path=FINETUNED_CHECKPOINT,
-            eval=True
-        )
-        FINE_MODEL_TTS.to(DEVICE)
-        logger.info("Дообученная модель XTTS успешно инициализированна")
+            FINE_MODEL_TTS = Xtts.init_from_config(fine_config)
+            FINE_MODEL_TTS.load_checkpoint(
+                fine_config,
+                checkpoint_dir=FINETUNED_MODEL_TTS_DIR,
+                checkpoint_path=FINETUNED_CHECKPOINT,
+                eval=True
+            )
+            FINE_MODEL_TTS.to(DEVICE)
+            logger.info("Дообученная модель XTTS успешно инициализированна")
 
     except Exception as e:
         logger.error(f"Ошибка при загрузке одной из моделей: {e}")
@@ -255,8 +254,14 @@ async def handle_video(message: Message, state: FSMContext):
         model_tts = ORIG_MODEL_TTS
         mode = 'original'
     elif data['voice_generation'] == 'putin':
-        model_tts = FINE_MODEL_TTS
-        mode = 'putin'
+        if DOWNLOADED_PUTIN:
+            model_tts = FINE_MODEL_TTS
+            mode = 'putin'
+        else:
+            await state.clear()
+            await message.reply(text='Дообученная модель не была загружена!' 
+                                     'Попробуйте другой голос')
+            return
     else:
         model_tts = ORIG_MODEL_TTS
         mode = 'yours'
@@ -561,8 +566,14 @@ async def handle_text(message: Message,  state: FSMContext):
 
     data = await state.get_data()
     if data['voice_generation'] == 'putin':
-        model_tts = FINE_MODEL_TTS
-        mode = 'putin'
+        if DOWNLOADED_PUTIN:
+            model_tts = FINE_MODEL_TTS
+            mode = 'putin'
+        else:
+            await state.clear()
+            await message.reply(text='Дообученная модель не была загружена!' 
+                                     'Попробуйте другой голос')
+            return
     else:
         model_tts = ORIG_MODEL_TTS
         mode = 'yours'

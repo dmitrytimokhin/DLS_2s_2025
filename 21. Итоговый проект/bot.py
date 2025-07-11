@@ -27,7 +27,7 @@ MAIN_ADMIN = int(os.getenv("MAIN_ADMIN_ID"))
 async def start_bot(bot: Bot):
     await set_commands(bot)
     try:
-#        await bot.send_message(chat_id=MAIN_ADMIN, text='The VideoDubBot запущен!')
+        await bot.send_message(chat_id=MAIN_ADMIN, text='The VideoDubBot запущен!')
         logger.info(msg='Бот VideoDubBot запущен!')
     except Exception as e:
         logger.error(f'[Exception] - {e}', exc_info=True)
@@ -35,7 +35,7 @@ async def start_bot(bot: Bot):
 
 async def stop_bot(bot: Bot):
     try:
-#        await bot.send_message(chat_id=MAIN_ADMIN, text='Бот VideoDubBot остановлен!')
+        await bot.send_message(chat_id=MAIN_ADMIN, text='Бот VideoDubBot остановлен!')
         logger.info(msg='Бот VideoDubBot остановлен!')
     except Exception as e:
         logger.error(msg=f'[Exception] - {e}', exc_info=True)

@@ -14,7 +14,7 @@ from TTS.tts.models.xtts import Xtts
 
 from pydub import AudioSegment
 
-from src import seed_torch, create_path, download_and_unzip
+from src import seed_torch, create_path, download_and_unzip, split_text_by_chars
 from src import download_missing_model_files
 
 from handlers import FSMVoice
@@ -248,6 +248,8 @@ async def handle_video(message: Message, state: FSMContext):
     manage_directory(output_dir, action='create')
 
     # --- Обработка видео ---
+    await state.update_data(video_path=output_dir)
+    await state.set_state(FSMVoice.process)
     data = await state.get_data()
 
     if data['voice_generation'] == 'original':
@@ -303,6 +305,7 @@ async def handle_video(message: Message, state: FSMContext):
 
     # --- Чистим временные файлы ---
     manage_directory(output_dir, action='delete')
+    await state.clear()
 
 
 # --- Handler Видео / аудио транскрипция ---
@@ -414,10 +417,14 @@ async def handle_video(message: Message, state: FSMContext):
         
     need_kb = kb_main
 
-    await message.reply(text=need_text,
-                        reply_markup=need_kb)
-    
+    list_texts = split_text_by_chars(text=need_text, max_length=4095)
+
+    for text in list_texts:
+        await message.reply(text=text,
+                            reply_markup=need_kb)
+        
     manage_directory(output_dir, action='delete')
+    await state.clear()
 
 
 # --- Handler Видео / текст перевод ---
@@ -521,10 +528,14 @@ async def handle_video(message: Message, state: FSMContext):
         
     need_kb = kb_main
 
-    await message.reply(text=need_text,
-                        reply_markup=need_kb)
+    list_texts = split_text_by_chars(text=need_text, max_length=4095)
+
+    for text in list_texts:
+        await message.reply(text=text,
+                            reply_markup=need_kb)
     
     manage_directory(output_dir, action='delete')
+    await state.clear()
 
 
 # --- Handler озвучить текст ---

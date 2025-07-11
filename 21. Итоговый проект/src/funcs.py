@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import NoReturn, Optional, Tuple
+from typing import NoReturn, Optional, Tuple, List
 import shutil
 import random
 import numpy as np
@@ -259,3 +259,17 @@ def download_and_unzip(file_id: str,
     except Exception as e:
         logger.error(f'Ошибка при загрузке файлов дообученной модели {e}')
         return (False, target_folder)
+    
+
+def split_text_by_chars(text: str, max_length: int = 4096) -> List[str]:
+    """
+    Разбивает текст на части по заданному количеству символов.
+    
+    Параметры:
+        text (str): входной текст
+        max_length (int): Максимальное количество символов в куске
+    
+    Возвращаем:
+        List[str]: список строк, каждая <= max_length символов
+    """
+    return [text[i:i + max_length] for i in range(0, len(text), max_length)]

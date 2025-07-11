@@ -5,7 +5,7 @@ from typing import Optional
 from dotenv import load_dotenv
 
 from src import (create_path, manage_directory, extract_audio_from_video, mix_audio_tracks,
-                 add_audio_to_video)
+                 add_audio_to_video, split_text_by_chars)
 from src import separate_audio_sources, preprocess_audio_for_asr
 from src import transcribe_and_segment
 from src import translate_segments
@@ -100,10 +100,10 @@ async def full_pipeline(
         output_audio_path=FINAL_VOICE_PATH,
         speaker_wav=speaker_wav,
         language=LANGUAGE,
-        max_speedup_factor=1.2,
+        max_speedup_factor=1.5,
         min_pause_between_segments=0.2,
         fade_in_out_ms=50,
-        crossfade_ms=30,
+        crossfade_ms=25,
         max_shift_left_seconds=0.5,
         threshold_compression=-15.0,
         ratio_compression=2.0,
@@ -242,8 +242,10 @@ async def run_translation(model_asr, pipeline_mt, video: bool=True, text: Option
         text = ' '.join(item['text'] for item in segments if item['text']).strip()
     else:
         text = text
+
+    list_texts = split_text_by_chars(text)
     
-    text_format = [{'text': text, 'start': -1, 'end': -1}]
+    text_format = [{'text': text, 'start': -1, 'end': -1} for text in list_texts]
 
     translated_segments = translate_segments(
         pipeline_mt=pipeline_mt,

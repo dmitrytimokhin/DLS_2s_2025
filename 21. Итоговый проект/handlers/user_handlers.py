@@ -46,6 +46,7 @@ FINETUNED_MODEL_TTS_DIR = "./finetuned_tts_model/"
 FINETUNED_CONFIG = create_path(FINETUNED_MODEL_TTS_DIR, "config.json")
 FINETUNED_CHECKPOINT = create_path(FINETUNED_MODEL_TTS_DIR, "best_model.pth")
 FINETUNED_REF = create_path(FINETUNED_MODEL_TTS_DIR, "putin_ref.wav")
+manage_directory(FINETUNED_MODEL_TTS_DIR)
 
 MAX_DURATION_MS = 20 * 1000
 

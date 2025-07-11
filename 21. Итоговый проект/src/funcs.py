@@ -241,7 +241,7 @@ def download_and_unzip(file_id: str,
         # Проверяем, существует ли уже нужная папка
         if os.path.exists(target_folder):
             logger.info(f"Папка {target_folder} уже существует. Пропускаем скачивание.")
-            return
+            return (True, target_folder)
 
         url = f" https://drive.google.com/uc?id={file_id}"
         logger.info(f"Скачивание 'finetuned_tts_model' по {url}...")
@@ -253,6 +253,9 @@ def download_and_unzip(file_id: str,
         
         logger.debug(f"Очистка: удаление {output_zip}")
         os.remove(output_zip)
+
+        return (True, target_folder)
+    
     except Exception as e:
         logger.error(f'Ошибка при загрузке файлов дообученной модели {e}')
-        return False, target_folder
+        return (False, target_folder)

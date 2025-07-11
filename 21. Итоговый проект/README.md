@@ -135,14 +135,7 @@ video-dubbing/
 
 1. Сделай клонирование проекта к себе на локальное пространство.
 
-2. Собери и запусти docker образ:
-   ```
-   docker-compose build --no-cache
-   docker-compose up -d # можно в docker-compose в command прописать автоматический запуск bot.py в дальнейшем
-   docker exec -it video-dubbing bash
-   ```
-
-3. Настрой `.env` файл:
+2. Настрой `.env` файл:
    ```
    TOKENBOT=ваш уникальный бот токен
 
@@ -150,6 +143,13 @@ video-dubbing/
    VERSION=0.0.1 # версия бота
 
    FINETUNED_TTS_MODEL='1THzPSi5O_-fDCdrhiqU68530TaDT7S4L' # путь для скачивания дообученной модели на голосе В.В. Путина
+   ```
+
+3. Собери и запусти docker образ:
+   ```
+   docker-compose build --no-cache
+   docker-compose up -d
+   docker exec -it video-dubbing bash
    ```
 
 4. Запусти бота:
